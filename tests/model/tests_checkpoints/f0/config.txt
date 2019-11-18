@@ -1,0 +1,22 @@
+[unet]
+unet_floors_num_layers = [2, 2, 2]
+unet_first_floor_layers_num_kernels = 64
+unet_layers_kernel_shape = [3, 3]
+unet_layers_pool_shape = [2, 2]
+unet_layers_pool_stride = [2, 2]
+
+[dataset]
+dataset_eval_batch_size = 16
+
+[database]
+database_data_type = HCQT_TO_F0
+database_data_chunks_duration_in_sec = 0.2
+database_data_chunks_overlap_in_sec = 0
+database_data_chunks_padding_type = SAME
+database_src_data_shape = [4, 72, 6]
+database_tgt_data_shape = [4, 72]
+
+[corpus]
+corpus_data_sec_to_bins = 10
+
+
