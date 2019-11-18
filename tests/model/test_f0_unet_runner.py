@@ -21,13 +21,8 @@ class F0UnetRunnerTest(tf.test.TestCase):
 		runner = F0ModelRunner(model_directory_path=model_directory_path)
 		runner.build_model()
 
-		# change the expected source duration to speed up test
-		#input_chunk_shape = [4, 36, 6]
 		hparams = runner.model.hparams
 		input_chunk_shape = hparams.database_src_data_shape # [t, f, h] # small t to speed up test on cpu, f and h is imposed by this model
-		#hparams.database_data_chunks_duration_in_sec = 0.4
-		#hparams.database_data_chunks_overlap_in_sec = 0
-		#hparams.corpus_data_sec_to_bins = 10
 
 		with tempfile.TemporaryDirectory() as save_directory_path:
 

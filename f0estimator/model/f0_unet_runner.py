@@ -8,11 +8,12 @@ from f0estimator.model.f0_unet import F0Unet
 import f0estimator.helpers.chunker as chunker
 import f0estimator.helpers.utils as utils
 
+F0_MODEL_DIRECTORY_PATH = './checkpoints/f0'
 
 class F0ModelRunner:
 
 	def __init__(self,
-	             model_directory_path,
+	             model_directory_path=None,
 	             devices = None
 	             ):
 		"""
@@ -20,8 +21,10 @@ class F0ModelRunner:
 			model_directory_path:
 			devices:
 		"""
+		if model_directory_path is None:
+			model_directory_path = F0_MODEL_DIRECTORY_PATH
 
-		if model_directory_path is None or not os.path.exists(model_directory_path):
+		if not os.path.exists(model_directory_path):
 			raise ValueError('There is no model at %s.' % model_directory_path)
 
 		if not os.path.exists(os.path.join(model_directory_path, 'checkpoint')):
@@ -65,7 +68,7 @@ class F0ModelRunner:
 
 
 
-	def apply_model(self, sources_filepaths, save_directory_path=None):
+	def apply_model(self, sources_filepaths, save_directory_path=None, verbose=False):
 		"""
 		Applies the trained model to the data stored at source_filepath.
 		It divides the data into chunks of the length that was used for model training, process the chunks, and
@@ -88,15 +91,11 @@ class F0ModelRunner:
 		if not os.path.exists(save_directory_path):
 			os.mkdir(save_directory_path)
 
-
-		logger = utils.get_logger(logs_directory_path=save_directory_path)
-
 		save_files_extension = 'f0.npy'
 
 		start_time = time.time()
 
 		num_filepaths = len(sources_filepaths)
-		logger.info("Starting to apply model to %d tracks..." % num_filepaths)
 
 		target_filepaths = []
 		for i, source_filepath in enumerate(sources_filepaths):
@@ -111,23 +110,14 @@ class F0ModelRunner:
 
 				tgt_filepath = os.path.join(save_directory_path, '%s.%s' % (tgt_filename, save_files_extension))
 
-				if os.path.exists(tgt_filepath):
-					logger.info("       %s already computed." % tgt_filepath)
+				if not os.path.exists(tgt_filepath):
 
-				else:
 					src_data = utils.load_data(source_filepath) # [f, t] or [h, f, t]
 					src_data = np.transpose(src_data) # [t, ...]
 
 					tgt_data = self.apply_for_same_padding(src_data)
 					# saver
 					utils.save_data(tgt_filepath, tgt_data)
-
-				hop = max(10, num_filepaths // 10)
-				if i > 0 and i % hop == 0:
-					logger.info("  Applied model to %d (out of %d) examples (eta: %s)..." %
-					            (i,
-					             num_filepaths,
-					             utils.eta_based_on_elapsed_time(i, num_filepaths, start_time)))
 
 				target_filepaths.append(tgt_filepath)
 
