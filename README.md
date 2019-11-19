@@ -4,10 +4,8 @@
 A neural network estimating the dominant melody, based on this 
 [paper](https://www.researchgate.net/profile/Guillaume_Doras/publication/332434939_On_the_Use_of_U-Net_for_Dominant_Melody_Estimation_in_Polyphonic_Music/links/5cff5dbc4585157d15a20f9a/On-the-Use-of-U-Net-for-Dominant-Melody-Estimation-in-Polyphonic-Music.pdf).
 
-For each audio file, tt computes its HCQT and estimates its dominant melody. This representation 
-is trimmed along the frequency axis to keep only 3 octaves around the mean pitch. 
- 
-Final resolution is one bin per semi-tone and each time frame is ~58 ms.
+For each audio file, it computes its HCQT and estimates its dominant melody. This representation 
+is trimmed along the frequency axis to keep only 3 octaves around the mean pitch. Final resolution is one bin per semi-tone and each time frame is ~58 ms.
 
 To use it:
 
