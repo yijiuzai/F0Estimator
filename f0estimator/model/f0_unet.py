@@ -353,8 +353,8 @@ class F0Unet:
 		if not self.loaded:
 			# we don't have a session yet
 			if session is None:
-				#device_config = devices_factory.build_device_config(hparams)
-				session = tf.Session(target='', graph=graph)#, config=device_config)
+				device_config = utils.build_device_config()
+				session = tf.Session(target='', graph=graph, config=device_config)
 
 			self.session = session # keep reference
 

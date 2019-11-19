@@ -9,7 +9,7 @@ from configparser import ConfigParser
 
 def acquire_devices(num_devices=1):
 
-	TITAN_XP_ID = 1
+	TITAN_XP_ID = 2
 	CPU = '/cpu'
 	GPU = '/gpu'
 
@@ -56,6 +56,25 @@ def acquire_devices(num_devices=1):
 
 
 	return devices
+
+
+def build_device_config():
+	"""
+	Set up GPU options.
+	Args:
+		hparams:
+	Returns:
+		-
+	"""
+
+	config_proto = tf.ConfigProto(
+		allow_soft_placement=True, # do we allow TF to switch to another devices if ours is not available ?
+		log_device_placement=False, # do we log the devices usage ?
+	)
+	config_proto.gpu_options.allow_growth = True
+	#config_proto.gpu_options.per_process_gpu_memory_fraction = 0.9
+
+	return config_proto
 
 def save_data(filepath, data):
 	"""

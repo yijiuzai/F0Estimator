@@ -71,7 +71,7 @@ class F0ModelRunner:
 
 
 
-	def apply_model(self, sources_filepaths, save_directory_path=None, verbose=False):
+	def apply_model(self, sources_filepaths, save_directory_path=None):
 		"""
 		Applies the trained model to the data stored at source_filepath.
 		It divides the data into chunks of the length that was used for model training, process the chunks, and
