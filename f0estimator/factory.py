@@ -61,8 +61,8 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
 	# get all audio files in this directory
 	audio_filepaths = []
 	for audio_directory_path in audio_directory_paths:
-		for audio_files_extension in audio_files_extensions:
-			audio_filepaths += glob.glob(os.path.join(audio_directory_path, '*.%s' % audio_files_extension))
+		for (sub_directory_path, _, filenames) in os.walk(audio_directory_path):
+			audio_filepaths += [os.path.join(sub_directory_path, filename) for filename in filenames if os.path.splitext(filename)[1][1:] in audio_files_extensions]
 
 	if not os.path.exists(save_directory_path):
 		os.makedirs(save_directory_path)
