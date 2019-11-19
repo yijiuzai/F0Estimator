@@ -6,6 +6,7 @@ import time
 
 from f0estimator.model.f0_unet_runner import F0ModelRunner
 import f0estimator.helpers.spectral as spectral
+import f0estimator.helpers.rescaler as rescaler
 import f0estimator.helpers.utils as utils
 
 
@@ -175,11 +176,24 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 				                                                      n_hcqt_jobs=n_hcqt_jobs)
 
 				# run the model
-				runner.apply_model([hcqt_filepath],
-				                   save_directory_path=save_directory_path)
+				f0_filepaths = runner.apply_model([hcqt_filepath],
+				                                  save_directory_path=save_directory_path)
 
 
 				os.remove(hcqt_filepath)
+
+				# rescale
+				f0_filepath = f0_filepaths[0] # we have only one file here
+
+				f0_data = rescaler.rescale_data(utils.load_data(f0_filepath),
+				                                data_sec_to_bins=hcqt_hop_length_in_bins/audio_sampling_rate_in_hz,
+				                                data_num_octaves=hcqt_num_octaves,
+				                                data_num_bins_per_octave=hcqt_num_bins_per_octave,
+				                                data_down_scale_factor=hcqt_num_bins_per_octave//12,
+				                                data_new_duration_in_sec=None,
+				                                data_new_duration_in_bins=None)
+
+				utils.save_data(f0_filepath, f0_data)
 
 				hop = max(10, num_remaining_audio_filepaths // 10)
 				if i > 0 and i % hop == 0:
