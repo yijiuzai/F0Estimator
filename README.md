@@ -11,7 +11,7 @@ Final resolution is one bin per semi-tone and each time frame is ~58 ms.
 
 To use it:
 
-    python factory.py --audio your_audio_directory_path --save where_to_save_directory_path
+    python -m f0estimator.factory --audio your_audio_directory_path --save where_to_save_directory_path
 
 If you use it, please cite our work:
 
@@ -24,3 +24,4 @@ If you use it, please cite our work:
         year={2019},
         organization={IEEE}
       }
+      

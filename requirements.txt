@@ -1,5 +1,5 @@
-librosa==0.6.3
-tensorflow==1.12.0
-joblib==0.13.12
+librosa
+tensorflow==1.15.0
+joblib
 scikit_image==0.15.0
-numpy==1.17.4
+numpy
