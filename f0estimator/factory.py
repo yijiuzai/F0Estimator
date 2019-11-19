@@ -12,7 +12,7 @@ import f0estimator.helpers.utils as utils
 F0_LOGGER_NAME = 'f0_estimator'
 HCQT_FILES_EXTENSION = 'hcqt.npy.gz'
 F0_FILES_EXTENSION = 'f0.npy'
-F0_MODEL_DIRECTORY_PATH = './model/checkpoints/f0'
+F0_MODEL_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model', 'checkpoints', 'f0')
 
 
 def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,

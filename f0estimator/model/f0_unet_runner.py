@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import os
-import time
 
 from f0estimator.model.f0_unet import F0Unet
 
@@ -9,7 +8,8 @@ import f0estimator.helpers.chunker as chunker
 import f0estimator.helpers.utils as utils
 
 F0_LOGGER_NAME = 'f0_estimator'
-F0_MODEL_DIRECTORY_PATH = './checkpoints/f0'
+F0_MODEL_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'checkpoints', 'f0')
+
 
 class F0ModelRunner:
 
