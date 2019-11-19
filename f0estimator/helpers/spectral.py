@@ -1,9 +1,9 @@
-import argparse
 import os
 from joblib import Parallel, delayed
-import glob
 import numpy as np
 import librosa
+
+import f0estimator.helpers.utils as utils
 
 CORPUS_HCQT_FILES_EXTENSION = 'hcqt.npy.gz'
 
@@ -45,7 +45,7 @@ def compute_and_save_log_hcqt_for_audio_filepath(audio_filepath,
 		                        n_hcqt_jobs=n_hcqt_jobs)
 
 
-		save_data(hcqt_filepath, hcqt) # [h, f, t]
+		utils.save_data(hcqt_filepath, hcqt) # [h, f, t]
 
 		del hcqt
 

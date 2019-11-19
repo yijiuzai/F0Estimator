@@ -8,6 +8,7 @@ from f0estimator.model.f0_unet import F0Unet
 import f0estimator.helpers.chunker as chunker
 import f0estimator.helpers.utils as utils
 
+F0_LOGGER_NAME = 'f0_estimator'
 F0_MODEL_DIRECTORY_PATH = './checkpoints/f0'
 
 class F0ModelRunner:
@@ -44,6 +45,8 @@ class F0ModelRunner:
 		self.model_class = F0Unet
 		self.model_class_kwargs = None
 		self.model = None
+
+		self.logger = utils.get_logger(F0_LOGGER_NAME)
 
 
 
@@ -93,10 +96,6 @@ class F0ModelRunner:
 
 		save_files_extension = 'f0.npy'
 
-		start_time = time.time()
-
-		num_filepaths = len(sources_filepaths)
-
 		target_filepaths = []
 		for i, source_filepath in enumerate(sources_filepaths):
 
@@ -122,11 +121,9 @@ class F0ModelRunner:
 				target_filepaths.append(tgt_filepath)
 
 			except (EOFError, OSError):
-				logger.warning('Could not load %s...' % source_filepath)
+				self.logger.warning('Could not load %s...' % source_filepath)
 
-		logger.info("Applied model to %d tracks saved at %s in %s." % (len(sources_filepaths),
-		                                                               save_directory_path,
-		                                                               utils.elapsed_since(start_time)))
+
 
 		return target_filepaths
 

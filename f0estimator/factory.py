@@ -9,7 +9,7 @@ import f0estimator.helpers.spectral as spectral
 import f0estimator.helpers.utils as utils
 
 
-F0_LOGGER_NAME = 'f0s'
+F0_LOGGER_NAME = 'f0_estimator'
 HCQT_FILES_EXTENSION = 'hcqt.npy.gz'
 F0_FILES_EXTENSION = 'f0.npy'
 
@@ -17,6 +17,7 @@ F0_FILES_EXTENSION = 'f0.npy'
 
 def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
                                                    save_directory_path,
+                                                   model_directory_path=None,
                                                    audio_files_extensions='mp3',
                                                    audio_sampling_rate_in_hz=22050,
                                                    hcqt_hop_length_in_bins=256,
@@ -25,13 +26,14 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
                                                    hcqt_num_bins_per_octave=60,
                                                    hcqt_harmonics=(0.5, 1, 2, 3, 4, 5),
                                                    n_hcqt_jobs=1,
-                                                   n_jobs=16):
+                                                   n_devices=1):
 	"""
 	Computes HCQTs for all audio files in this directory.
 
 	Args:
 		audio_directory_paths: list or str, the directory(ies) of the audio files.
 		save_directory_path: str, where to save the target files.
+		model_directory_path:
 		audio_files_extensions: list or str, the extension(s) of the audio files to consider in this directory.
 		audio_sampling_rate_in_hz:
 		hcqt_hop_length_in_bins:
@@ -40,7 +42,7 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
 		hcqt_num_bins_per_octave:
 		hcqt_harmonics:
 		n_hcqt_jobs:
-		n_jobs:
+		n_devices:
 
 	Returns:
 
@@ -67,14 +69,16 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
 	utils.get_logger(F0_LOGGER_NAME, logs_directory_path=save_directory_path)
 
 	compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
-	                                                    audio_sampling_rate_in_hz=audio_sampling_rate_in_hz,
-	                                                    hcqt_hop_length_in_bins=hcqt_hop_length_in_bins,
-	                                                    hcqt_frequency_min_in_hz=hcqt_frequency_min_in_hz,
-	                                                    hcqt_num_octaves=hcqt_num_octaves,
-	                                                    hcqt_num_bins_per_octave=hcqt_num_bins_per_octave,
-	                                                    hcqt_harmonics=hcqt_harmonics,
-	                                                    n_hcqt_jobs=n_hcqt_jobs,
-	                                                    n_jobs=n_jobs)
+	                                         save_directory_path=save_directory_path,
+	                                         model_directory_path=model_directory_path,
+	                                         audio_sampling_rate_in_hz=audio_sampling_rate_in_hz,
+	                                         hcqt_hop_length_in_bins=hcqt_hop_length_in_bins,
+	                                         hcqt_frequency_min_in_hz=hcqt_frequency_min_in_hz,
+	                                         hcqt_num_octaves=hcqt_num_octaves,
+	                                         hcqt_num_bins_per_octave=hcqt_num_bins_per_octave,
+	                                         hcqt_harmonics=hcqt_harmonics,
+	                                         n_hcqt_jobs=n_hcqt_jobs,
+	                                         n_devices=n_devices)
 
 
 
@@ -88,20 +92,23 @@ def generate_hcqt_filepath_for_audio_filepath(audio_filepath, save_directory_pat
 
 
 def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
-                                                      save_directory_path,
-                                                      audio_sampling_rate_in_hz=22050,
-                                                      hcqt_hop_length_in_bins=256,
-                                                      hcqt_frequency_min_in_hz=32.7,
-                                                      hcqt_num_octaves=6,
-                                                      hcqt_num_bins_per_octave=60,
-                                                      hcqt_harmonics=(0.5, 1, 2, 3, 4, 5),
-                                                      n_hcqt_jobs=1,
-                                                      n_devices=1):
+                                             save_directory_path,
+                                             model_directory_path=None,
+                                             audio_sampling_rate_in_hz=22050,
+                                             hcqt_hop_length_in_bins=256,
+                                             hcqt_frequency_min_in_hz=32.7,
+                                             hcqt_num_octaves=6,
+                                             hcqt_num_bins_per_octave=60,
+                                             hcqt_harmonics=(0.5, 1, 2, 3, 4, 5),
+                                             n_hcqt_jobs=1,
+                                             n_devices=1):
 	"""
 	Computes and save representation for audio/save filepaths pairs.
 
 	Args:
-		audio_and_save_filepaths: list, pairs of audio_filepath and save_filepath
+		audio_filepaths:
+		save_directory_path:
+		model_directory_path:
 		audio_sampling_rate_in_hz:
 		hcqt_hop_length_in_bins:
 		hcqt_frequency_min_in_hz:
@@ -109,15 +116,13 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 		hcqt_num_bins_per_octave:
 		hcqt_harmonics:
 		n_hcqt_jobs:
-		n_jobs:
+		n_devices:
 
 	Returns:
 
 	"""
 
 	logger = utils.get_logger(F0_LOGGER_NAME)
-
-
 
 	logger.info('Computing files for %d audio files... ' % len(audio_filepaths))
 
@@ -139,14 +144,17 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 
 		start_time = time.time()
 
-		logger.info('Loading model... ')
-		devices = utils.acquire_devices()
+		logger.info('Allocating %d devices... ' % n_devices)
+		devices = utils.acquire_devices(n_devices)
 
-		runner = F0ModelRunner(devices=devices)
+		logger.info('Loading model... ')
+		runner = F0ModelRunner(model_directory_path=model_directory_path,
+		                       devices=devices)
 		runner.build_model()
 
 		with tempfile.TemporaryDirectory() as tmp_directory_path:
 
+			logger.info('Computing F0 for %d files...' % num_remaining_audio_filepaths)
 			for i, audio_filepath in enumerate(remaining_audio_filepaths):
 
 				# first, compute the HCQT
@@ -196,29 +204,14 @@ def main():
 	# get the directory path where to save the corpus out of the arguments
 	arguments_parser = argparse.ArgumentParser()
 
+	arguments_parser.add_argument("--audio", type=str, nargs='+',default=None, help="Directory path(s) to the audio files.")
 	arguments_parser.add_argument("--save", type=str, default=None, required=True, help="A directory where to save the produced files.")
-	arguments_parser.add_argument("--audio", type=str, nargs='+',default=None, help="A directory from where to produce files.")
-
-	arguments_parser.add_argument("--sr", type=int, default=22050, help="Audio sampling rate in Hz..")
-	arguments_parser.add_argument("--hop", type=int, default=256, help="Hop size in bins.")
-	arguments_parser.add_argument("--no", type=int, default=6, help="Num octaves.")
-	arguments_parser.add_argument("--nbpo", type=int, default=60, help="Num bins per octave.")
-	arguments_parser.add_argument("--hs", type=int, nargs='+', default=(0.5, 1, 2, 3, 4, 5), help="Hcqt harmonics.")
-
-	arguments_parser.add_argument("--n_jobs",  type=int, default=1, help="Num processes.")
-
 
 
 	flags, _ = arguments_parser.parse_known_args()
 
-	compute_and_save_hcqts_for_audio_directory_paths(audio_directory_paths=flags.audio,
-	                                                 save_directory_path=flags.save,
-	                                                 audio_sampling_rate_in_hz=flags.sr,
-	                                                 hcqt_hop_length_in_bins=flags.hop,
-	                                                 hcqt_num_octaves=flags.no,
-	                                                 hcqt_num_bins_per_octave=flags.nbpo,
-	                                                 hcqt_harmonics=flags.hs,
-	                                                 n_jobs=flags.n_jobs)
+	compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths=flags.audio,
+	                                               save_directory_path=flags.save)
 
 
 
