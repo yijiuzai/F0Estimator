@@ -27,7 +27,8 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
                                                    hcqt_num_bins_per_octave=60,
                                                    hcqt_harmonics=(0.5, 1, 2, 3, 4, 5),
                                                    n_hcqt_jobs=1,
-                                                   n_devices=1):
+                                                   n_devices=1,
+                                                   rescale=True):
 	"""
 	Computes HCQTs for all audio files in this directory.
 
@@ -44,6 +45,7 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
 		hcqt_harmonics:
 		n_hcqt_jobs:
 		n_devices:
+		rescale:
 
 	Returns:
 
@@ -82,7 +84,8 @@ def compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths,
 	                                         hcqt_num_bins_per_octave=hcqt_num_bins_per_octave,
 	                                         hcqt_harmonics=hcqt_harmonics,
 	                                         n_hcqt_jobs=n_hcqt_jobs,
-	                                         n_devices=n_devices)
+	                                         n_devices=n_devices,
+	                                         rescale=rescale)
 
 
 
@@ -105,7 +108,8 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
                                              hcqt_num_bins_per_octave=60,
                                              hcqt_harmonics=(0.5, 1, 2, 3, 4, 5),
                                              n_hcqt_jobs=1,
-                                             n_devices=1):
+                                             n_devices=1,
+                                             rescale=True):
 	"""
 	Computes and save representation for audio/save filepaths pairs.
 
@@ -121,6 +125,7 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 		hcqt_harmonics:
 		n_hcqt_jobs:
 		n_devices:
+		rescale:
 
 	Returns:
 
@@ -185,15 +190,16 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 				# rescale
 				f0_filepath = f0_filepaths[0] # we have only one file here
 
-				f0_data = rescaler.rescale_data(utils.load_data(f0_filepath),
-				                                data_sec_to_bins=hcqt_hop_length_in_bins/audio_sampling_rate_in_hz,
-				                                data_num_octaves=hcqt_num_octaves,
-				                                data_num_bins_per_octave=hcqt_num_bins_per_octave,
-				                                data_down_scale_factor=hcqt_num_bins_per_octave//12,
-				                                data_new_duration_in_sec=None,
-				                                data_new_duration_in_bins=None)
+				if rescale:
+					f0_data = rescaler.rescale_data(utils.load_data(f0_filepath),
+					                                data_sec_to_bins=hcqt_hop_length_in_bins/audio_sampling_rate_in_hz,
+					                                data_num_octaves=hcqt_num_octaves,
+					                                data_num_bins_per_octave=hcqt_num_bins_per_octave,
+					                                data_down_scale_factor=hcqt_num_bins_per_octave//12,
+					                                data_new_duration_in_sec=None,
+					                                data_new_duration_in_bins=None)
 
-				utils.save_data(f0_filepath, f0_data)
+					utils.save_data(f0_filepath, f0_data)
 
 				hop = max(10, num_remaining_audio_filepaths // 10)
 				if i > 0 and i % hop == 0:
@@ -223,12 +229,13 @@ def main():
 
 	arguments_parser.add_argument("--audio", type=str, nargs='+',default=None, help="Directory path(s) to the audio files.")
 	arguments_parser.add_argument("--save", type=str, default=None, required=True, help="A directory where to save the produced files.")
-
+	arguments_parser.add_argument("--rescale", type=bool, default=True, help="Downsample the F0 output by the model.")
 
 	flags, _ = arguments_parser.parse_known_args()
 
 	compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths=flags.audio,
-	                                               save_directory_path=flags.save)
+	                                               save_directory_path=flags.save,
+	                                               rescale=flags.rescale)
 
 
 
