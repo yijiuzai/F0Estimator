@@ -187,10 +187,11 @@ def compute_and_save_f0s_for_audio_filepaths(audio_filepaths,
 
 				os.remove(hcqt_filepath)
 
-				# rescale
-				f0_filepath = f0_filepaths[0] # we have only one file here
-
 				if rescale:
+
+					# rescale
+					f0_filepath = f0_filepaths[0] # we have only one file here
+
 					f0_data = rescaler.rescale_data(utils.load_data(f0_filepath),
 					                                data_sec_to_bins=hcqt_hop_length_in_bins/audio_sampling_rate_in_hz,
 					                                data_num_octaves=hcqt_num_octaves,
