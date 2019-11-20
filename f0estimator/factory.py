@@ -230,13 +230,13 @@ def main():
 
 	arguments_parser.add_argument("--audio", type=str, nargs='+',default=None, help="Directory path(s) to the audio files.")
 	arguments_parser.add_argument("--save", type=str, default=None, required=True, help="A directory where to save the produced files.")
-	arguments_parser.add_argument("--rescale", type=bool, default=True, help="Downsample the F0 output by the model.")
+	arguments_parser.add_argument("--no_rescale", action='store_false', help="Downsample the F0 output by the model.")
 
 	flags, _ = arguments_parser.parse_known_args()
 
 	compute_and_save_f0s_for_audio_directory_paths(audio_directory_paths=flags.audio,
 	                                               save_directory_path=flags.save,
-	                                               rescale=flags.rescale)
+	                                               rescale=flags.no_rescale)
 
 
 
